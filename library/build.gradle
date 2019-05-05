@@ -1,9 +1,8 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
+//apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {
         minSdkVersion 14
@@ -29,12 +28,12 @@ dependencies {
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
 }
 
-publish {
-    artifactId = 'discrete-scrollview'
-    userOrg = rootProject.userOrg
-    groupId = rootProject.groupId
-    uploadName = rootProject.uploadName
-    publishVersion = rootProject.publishVersion
-    description = rootProject.description
-    licences = rootProject.licences
-}
+//publish {
+//    artifactId = 'discrete-scrollview'
+//    userOrg = rootProject.userOrg
+//    groupId = rootProject.groupId
+//    uploadName = rootProject.uploadName
+//    publishVersion = rootProject.publishVersion
+//    description = rootProject.description
+//    licences = rootProject.licences
+//}

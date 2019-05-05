@@ -52,9 +52,13 @@ public class DiscreteScrollView extends RecyclerView {
         onItemChangedListeners = new ArrayList<>();
 
         int orientation = DEFAULT_ORIENTATION;
+        int centerMode = DSVCenter.CENTER;
+        int itemSpace = 0;
         if (attrs != null) {
             TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.DiscreteScrollView);
             orientation = ta.getInt(R.styleable.DiscreteScrollView_dsv_orientation, DEFAULT_ORIENTATION);
+            centerMode =  ta.getInt(R.styleable.DiscreteScrollView_dsv_center, DSVCenter.CENTER);
+            itemSpace = ta.getDimensionPixelOffset(R.styleable.DiscreteScrollView_dsv_item_space,0);
             ta.recycle();
         }
 
@@ -62,7 +66,7 @@ public class DiscreteScrollView extends RecyclerView {
 
         layoutManager = new DiscreteScrollLayoutManager(
                 getContext(), new ScrollStateListener(),
-                DSVOrientation.values()[orientation]);
+                DSVOrientation.values()[orientation],centerMode,itemSpace);
         setLayoutManager(layoutManager);
     }
 

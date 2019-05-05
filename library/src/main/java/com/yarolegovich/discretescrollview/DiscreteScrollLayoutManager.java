@@ -68,6 +68,12 @@ class DiscreteScrollLayoutManager extends RecyclerView.LayoutManager {
     private boolean shouldSlideOnFling;
 
     private int viewWidth, viewHeight;
+    private DSVOrientation orientation;
+    private @DSVCenter.DSVCenterMode int centerMode;
+    /**
+     * item之间没有进行缩放过的间距
+     */
+    private int itemSpace;
 
     @NonNull
     private final ScrollStateListener scrollStateListener;
@@ -78,7 +84,8 @@ class DiscreteScrollLayoutManager extends RecyclerView.LayoutManager {
     public DiscreteScrollLayoutManager(
             @NonNull Context c,
             @NonNull ScrollStateListener scrollStateListener,
-            @NonNull DSVOrientation orientation) {
+            @NonNull DSVOrientation orientation,
+            @DSVCenter.DSVCenterMode int centerMode,int itemSpace) {
         this.context = c;
         this.timeForItemSettle = DEFAULT_TIME_FOR_ITEM_SETTLE;
         this.pendingPosition = NO_POSITION;
@@ -90,9 +97,12 @@ class DiscreteScrollLayoutManager extends RecyclerView.LayoutManager {
         this.viewCenterIterator = new Point();
         this.detachedCache = new SparseArray<>();
         this.scrollStateListener = scrollStateListener;
+        this.orientation = orientation;
         this.orientationHelper = orientation.createHelper();
         this.recyclerViewProxy = new RecyclerViewProxy(this);
         this.transformClampItemCount = DEFAULT_TRANSFORM_CLAMP_ITEM_COUNT;
+        this.centerMode = centerMode;
+        this.itemSpace = itemSpace;
     }
 
     @Override
@@ -106,7 +116,7 @@ class DiscreteScrollLayoutManager extends RecyclerView.LayoutManager {
 
         ensureValidPosition(state);
 
-        updateRecyclerDimensions(state);
+        updateRecyclerDimensions(state,recycler);
 
         //onLayoutChildren may be called multiple times and this check is required so that the flag
         //won't be cleared until onLayoutCompleted
@@ -155,25 +165,47 @@ class DiscreteScrollLayoutManager extends RecyclerView.LayoutManager {
 
         scrollToChangeCurrent = orientationHelper.getDistanceToChangeCurrent(
                 childViewWidth,
-                childViewHeight);
+                childViewHeight) + itemSpace;
 
         extraLayoutSpace = scrollToChangeCurrent * offscreenItems;
 
         recyclerViewProxy.detachAndScrapView(viewToMeasure, recycler);
     }
 
-    protected void updateRecyclerDimensions(RecyclerView.State state) {
+    protected void updateRecyclerDimensions(RecyclerView.State state, RecyclerView.Recycler recycler) {
         boolean dimensionsChanged = !state.isMeasuring()
-                && (recyclerViewProxy.getWidth()  != viewWidth
-                ||  recyclerViewProxy.getHeight() != viewHeight);
+                && (recyclerViewProxy.getWidth() != viewWidth
+                || recyclerViewProxy.getHeight() != viewHeight);
         if (dimensionsChanged) {
             viewWidth = recyclerViewProxy.getWidth();
             viewHeight = recyclerViewProxy.getHeight();
             recyclerViewProxy.removeAllViews();
         }
-        recyclerCenter.set(
-                recyclerViewProxy.getWidth() / 2,
-                recyclerViewProxy.getHeight() / 2);
+
+        if (centerMode == DSVCenter.CENTER) {
+            recyclerCenter.set(recyclerViewProxy.getWidth() / 2, recyclerViewProxy.getHeight() / 2);
+        } else {
+            View viewToMeasure = recyclerViewProxy.getMeasuredChildForAdapterPosition(0, recycler);
+
+            int childViewWidth = recyclerViewProxy.getMeasuredWidthWithMargin(viewToMeasure);
+            int childViewHeight = recyclerViewProxy.getMeasuredHeightWithMargin(viewToMeasure);
+            recyclerViewProxy.removeAllViews();
+
+
+            if (orientation == DSVOrientation.HORIZONTAL && childViewWidth / 2 > 0) {
+                recyclerCenter.set(childViewWidth / 2, recyclerViewProxy.getHeight() / 2);
+                return;
+            }
+
+            if (orientation == DSVOrientation.VERTICAL && childViewHeight / 2 > 0) {
+                recyclerCenter.set(childViewWidth / 2, recyclerViewProxy.getHeight() / 2);
+                recyclerCenter.set(recyclerViewProxy.getWidth() / 2, childViewHeight / 2);
+                return;
+            }
+
+            recyclerCenter.set(recyclerViewProxy.getWidth() / 2, recyclerViewProxy.getHeight() / 2);
+
+        }
     }
 
     protected void fill(RecyclerView.Recycler recycler) {

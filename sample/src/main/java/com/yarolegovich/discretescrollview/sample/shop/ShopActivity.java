@@ -10,9 +10,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.yarolegovich.discretescrollview.DSVOrientation;
 import com.yarolegovich.discretescrollview.DiscreteScrollView;
 import com.yarolegovich.discretescrollview.InfiniteScrollAdapter;
-import com.yarolegovich.discretescrollview.DSVOrientation;
 import com.yarolegovich.discretescrollview.sample.DiscreteScrollViewOptions;
 import com.yarolegovich.discretescrollview.sample.R;
 import com.yarolegovich.discretescrollview.transform.ScaleTransformer;
